@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title> 萌萌的的刷题神器-v1.0</title>
+	</head>
+	<body>
+		<p id ="subtitle"> 萌萌的小学三年级 数学四则运算 </p>
+		<div id = "lb2" align="left"></div> <!--左括号2-->
+		<div id = "d3" align="left"></div> <!--数字3-->  
+		<div id = "p2" align="left"></div> <!--操作符2-->
+		<div id = "lb1" align="left"></div> <!--左括号1-->
+		<div id = "d2" align="left"></div> <!--数字2-->
+		<div id = "rb2" align="left"></div> <!--右括号2-->
+		<div id = "p1" align="left"></div> <!--操作符1-->
+		<div id = "d1" align="left"></div> <!--数字1-->
+		<div id = "rb1" align="left"></div> <!--右括号1-->
+		<div id = "equal" align="left"> = </div> <!--等号-->
+		<input id = "a" 
+			   align="left"  
+			   type="text" 
+			   onkeyup="this.value=this.value.replace(/[^\d]/g,'') " 
+			   onafterpaste="this.value=this.value.replace(/[^\d]/g,'') " 
+			   name="f_order"/> <!--答案-->
+		<button id="submit" type="button" onclick="submitAnswer()"> 提交答案 </button>
+		<p id = "line1">______________________________________________________</p>
+		<div id="result" align="left"></div>
+		<p id = "line2">______________________________________________________</p>
+		<div id="total_t" align="left">总题目数：</div>
+		<div id="total" align="left"></div>
+		<div id="correct_t" align="left">正确数：</div>
+		<div id="correct" align="left"></div>
+		<div id="wrong_t" align="left">错误数：</div>
+		<div id="wrong" align="left"></div>	
+		<div id="accuracy_t" align="left">正确率：</div>
+		<div id="accuracy" align="left"></div>		
+		<script>
+		"use strict";
+		const
+			Min=2,
+			Max=200,
+			ProChar=[["×","÷"],["+","-"]];
+		var
+			lb2=document.getElementById("lb2"),
+			d3=document.getElementById("d3"),
+			p2=document.getElementById("p2"),
+			lb1=document.getElementById("lb1"),
+			d2=document.getElementById("d2"),
+			rb2=document.getElementById("rb2"),
+			p1=document.getElementById("p1"),
+			d1=document.getElementById("d1"),
+			rb1=document.getElementById("rb1"),
+			a=document.getElementById("a"),
+			v_a,
+			v_total = 0,
+			v_correct=0,
+			v_wrong=0,
+			v_accuracy=0.00;
+		function GetRandomNum(Min,Max){
+			 return Math.floor(Math.random() * (Max - Min + 1) ) + Min;
+		}
+		function GetRandomProChar(Exclude){
+			var proCharList=[];
+			for (var CharList of ProChar){
+				for (var Char1 of CharList){
+					if (!(Exclude.includes(Char1))){
+						proCharList.push(Char1);
+					}	
+				}
+
+			}
+			return proCharList[GetRandomNum(0,proCharList.length-1)];
+		}
+		function getMaxDivisor(Ped){
+			for (var i = Ped-1;i>=2;i--){
+				if (Ped%i==0){
+					return i;
+				}
+			}
+		}
+			
+		function newExpression(){
+			var
+			v_lb2,
+			v_d3,
+			v_p2,
+			v_lb1,
+			v_d2,
+			v_rb2,
+			v_ped,	//被v_p1 处理的数值
+			v_p1,
+			v_d1,
+			v_rb1;
+			/*var idx1ProChar,
+				idx2ProChar;*/
+			//debugger;
+			v_a =  GetRandomNum(Min,Max);
+			//get frist Express
+			//idx1ProChar=GetRandomNum(0,1)
+			if ( v_a < 10){
+				 v_p1 = GetRandomProChar(["×","+"]);// 如果最终答案小于10,则最后的运算只用除号和减号,这样就避免了被乘数和被加数小于1的情况
+			}else if(v_a>=100){
+				 v_p1 = GetRandomProChar(["÷","-"]);// 如果最终答案小于10,则最后的运算只用除号和减号,这样就避免了被乘数和被加数小于1的情况
+			}else{
+				 v_p1 = GetRandomProChar([]);
+			}
+			// v_p1=ProChar[idx1ProChar][idx2ProChar];
+			//debugger;
+			if ( v_p1=="×"){
+				var maxDivisor = getMaxDivisor(v_a)
+				if (maxDivisor){
+					 v_d1 = maxDivisor;
+					 v_ped =  v_a/ v_d1;
+				}else{
+					 v_p1=GetRandomProChar(["×"]); //如果没有找到最大约数,则换成其运算符
+				}
+			}
+			switch (v_p1){
+				case "+":
+					 v_d1=GetRandomNum(1, v_a-1);
+					 v_ped= v_a- v_d1;
+					break;
+				case "-":
+					 v_d1=GetRandomNum(1, Max*1.5 - v_a);
+					 v_ped= v_a+ v_d1;
+					break;
+				/*case "×":
+					 v_d1=getMaxDivisor( v_a)
+					break;*/
+				case "÷":
+					 v_d1=GetRandomNum(Math.floor(v_a/3), Math.floor(Max*2/v_a));
+					 v_ped= v_a* v_d1;
+					break;
+			}
+			if ( v_ped < 10){
+				 v_p2=GetRandomProChar(["×","+"]);// 如果最终答案小于10,则最后的运算只用除号和减号,这样就避免了被乘数和被加数小于1的情况
+			}else if(v_ped>=100){
+				 v_p2 = GetRandomProChar(["÷","-"]);// 如果最终答案小于10,则最后的运算只用除号和减号,这样就避免了被乘数和被加数小于1的情况
+			}else{
+				 v_p2=GetRandomProChar([ ]);;
+			}
+			if ( v_p2=="×"){
+				var maxDivisor2 = getMaxDivisor( v_ped)
+				if (maxDivisor2){
+					 v_d2 = maxDivisor2;
+					 v_d3 =  v_ped/ v_d2;
+				}else{
+					 v_p2=GetRandomProChar(["×"]); //如果没有找到最大约数,则换成其运算符
+				}
+			}
+			switch  (v_p2){
+				case "+":
+					 v_d2=GetRandomNum(1, v_ped-1);
+					 v_d3= v_ped- v_d2;
+					break;
+				case "-":
+					 v_d2=GetRandomNum(1, Max*1.5 - v_ped);
+					 v_d3= v_ped+ v_d2;
+					break;
+				/*case "×":
+					 v_d1=getMaxDivisor( v_ped)
+					break;*/
+				case "÷":
+					 v_d2=GetRandomNum(Math.floor(v_ped/3), Math.floor(Max*2/v_ped));
+					 v_d3= v_ped* v_d2;
+					break;
+			}
+			if (ProChar[0].includes(v_p1) && ProChar[1].includes(v_p2)){
+				v_lb2 ="(";
+				v_rb2 = ")";
+			}else{
+				v_lb2 ="";
+				v_rb2 ="";
+			}
+			lb2.innerHTML  = v_lb2;
+			if(v_d3){d3.innerHTML  = v_d3;}
+			if(v_p2){p2.innerHTML  = v_p2;}
+			if(v_lb1){lb1.innerHTML  = v_lb1;}
+			if(v_d2){d2.innerHTML  = v_d2;}
+			rb2.innerHTML  = v_rb2;
+			if(v_p1){p1.innerHTML  = v_p1;}
+			if(v_d1){d1.innerHTML  = v_d1;}
+			if(v_rb1){rb1.innerHTML  = v_rb1;}
+			a.value = "";
+			document.getElementById('a').focus();
+		}
+		function submitAnswer(){
+			var
+				result=document.getElementById("result"),
+				mes,
+				isCorrect=false,
+				isNew=false,
+				total=document.getElementById("total"),
+				correct=document.getElementById("correct"),
+				wrong=document.getElementById("wrong"),
+				accuracy=document.getElementById("accuracy");
+			debugger;
+			if(a.value==""){
+				 mes = "答案不能为空！";
+			}else{
+				isNew=true;
+				if(a.value==v_a){
+					mes = "回答正确！";
+					isCorrect=true;
+				}else{
+					mes = "上一题回答错误！"+"正确答案是 " +v_a.toString()+"。";
+					
+				}
+			}
+			result.innerHTML = mes;
+			if (isNew){
+				v_total++;
+				if(isCorrect){
+					v_correct++;	
+				}else{
+					v_wrong++;
+				}
+				v_accuracy = Math.round(v_correct/v_total*100).toString()+"%";
+				total.innerHTML = v_total;
+				correct.innerHTML=v_correct;
+				wrong.innerHTML=v_wrong;
+				accuracy.innerHTML=v_accuracy;
+				newExpression();
+			}
+		}
+		</script>
+		<script>
+			newExpression();
+			//document.getElementById('a').focus();
+		</script>
+		<style>
+			html,body{
+			    width: 100%;
+			    height: 100%;
+			    margin: 0;
+			    padding: 0;
+			    overflow: hidden;
+			    background: #e6e7ec;
+			}
+		#subtitle{
+			position: absolute;
+			text-align:left;
+		    width: 400px;
+		    height: 40px;
+		    border-radius: 30px;
+		    outline: none;
+		    font-size: 20px;
+		    /*box-sizing: border-box;*/
+		    color: #00BCD4;
+		    /*background: #fff;*/
+		    border: none;
+		    /*box-shadow: 1px 1px 3px 1px #9e9e9e5e;*/
+		    top: 5px;
+		    left:20px;
+		}	
+		#lb2,#d3,#p2,#lb1,#d2,#rb2,#p1,#d1,#rb1,#equal,#a{
+		    position: absolute;
+		    /*display: block;*/
+		    text-align:center;
+		    width: 40px;
+		    height: 40px;
+		    border-radius: 30px;
+		    outline: none;
+		    font-size: 20px;
+		    /*box-sizing: border-box;*/
+		    color: #00BCD4;
+		    /*background: #fff;*/
+		    border: none;
+		    /*box-shadow: 1px 1px 3px 1px #9e9e9e5e;*/
+		    top: 60px;
+		    /*left: 270px;*/
+		    user-select: none;
+		}
+		#a{
+			width: 80px;	
+		}
+		#1b2{left:10px;}
+		#d3{left:30px;}
+		#p2{left:70px;}
+		/*#lb1{left:100px;}*/
+		#d2{left:100px;}
+		#rb2{left:120px;}
+		#p1{left:140px;}
+		#d1{left:170px;}
+		/*#rb1{left:260px;}*/
+		#equal{left:200px;}
+		#a{top: 55px;left:240px;}
+		#submit{
+			transition: 1s all;
+		    position: absolute;
+		    display: block;
+		    width: 100px;
+		    height: 40px;
+		    border-radius: 30px;
+		    outline: none;
+		    font-size: 20px;
+		    box-sizing: border-box;
+		    color: #fff;
+		    background: #01BCFF;
+		    border: none;
+		    box-shadow: 1px 1px 3px 1px #9e9e9e5e;
+		    top: 55px;left:330px;
+		    user-select: none;
+		}
+		#submit:active{
+	    transition-property: all;
+	    transition-duration: 1s;
+	    transition-timing-function: ease;
+	    transition-delay: 0s;
+	    transform: scale(.8);
+		}
+		#line1,#line2{
+		position: absolute;
+		text-align:left;
+		color: #00BCD4;
+		font-size: 20px;
+		left:0px;
+		}
+		#line1{
+			top:70px;
+		}
+		#line2{
+			top:125px;
+		}
+		#result{
+			position: absolute;
+			text-align:left;
+		    width: 400px;
+		    height: 40px;
+		    border-radius: 30px;
+		    outline: none;
+		    font-size: 20px;
+		    /*box-sizing: border-box;*/
+		    color: #00BCD4;
+		    /*background: #fff;*/
+		    border: none;
+		    /*box-shadow: 1px 1px 3px 1px #9e9e9e5e;*/
+		    top: 120px;
+		    left:20px;
+		}
+		#total_t,#total,#correct_t,#correct,#wrong_t,#wrong,#accuracy_t,#accuracy{
+			position: absolute;
+		    /*display: block;*/
+		    text-align:center;
+		    width: 40px;
+		    height: 40px;
+		    border-radius: 30px;
+		    outline: none;
+		    font-size: 10px;
+		    /*box-sizing: border-box;*/
+		    color: #00BCD4;
+		    /*background: #fff;*/
+		    border: none;
+		    /*box-shadow: 1px 1px 3px 1px #9e9e9e5e;*/
+		    top: 170px;
+		    /*left: 270px;*/
+		    user-select: none;	
+		}
+		#total_t{left:20px;}
+		#total{left:80px;}
+		#correct_t{left:120px;}
+		#correct{left:180px;}
+		#wrong_t{left:240px;}
+		#wrong{left:300px;}
+		#accuracy_t{left:360px;}
+		#accuracy{left:420px;}
+		</style>
+	</body>
+</html>
